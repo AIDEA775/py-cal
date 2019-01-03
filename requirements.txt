@@ -1,1 +1,5 @@
 svgwrite==1.1.10
+docopt==0.6.2
+Pillow==5.4.0
+colour==0.1.5
+icalendar==4.0.3
