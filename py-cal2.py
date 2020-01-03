@@ -1,4 +1,4 @@
-"""Run all with: $ for m in {1..12}; do python3 py-cal2.py <year> $m; done
+"""Run all with: $ for m in {1..12}; do python3 py-cal.py <year> $m; done
 
 Usage:
   py-cal.py <year> <month> [options]
@@ -21,15 +21,15 @@ from colour import Color
 locale.setlocale(locale.LC_ALL, 'es_AR.UTF-8')
 calendar.setfirstweekday(calendar.SUNDAY)
 
-# x -> dia de semana
-# y \|/ filaa
+# x -> day of week
+# y \|/ row
 # 7016 x 4961 px is A4 at 600 DPI
 width = 4961
 height = 7016
 week_off = 400
 w_box = width / 7.0
 h_box = (height - week_off) / 5.0
-box_off = 10
+box_off = 4
 
 # Init
 args = docopt(__doc__, version='py-cal 2.0')
@@ -57,12 +57,9 @@ if month != 1:
         # last days from previous month
         for i, day in enumerate(previous[5]):
             if day != 0:
-                cal[i][0] = datetime.date(year, month-1, day)
+                cal[0][i] = datetime.date(year, month-1, day)
 
 # Birthday list
-fnt_notes = ImageFont.truetype('Lato-Medium.ttf', 44)
-
-birth_emoji = Image.open('./birth_emoji.png', 'r')
 g = open(birthdays, 'rb')
 gcal = Calendar.from_ical(g.read())
 
@@ -70,6 +67,7 @@ birth_list = []
 for c in gcal.walk():
     if c.name == "VEVENT":
         day = c.decoded('dtstart')
+        day = day.replace(year = year)
         birth_text = str(c.get('summary')).replace("Cumpleaños de ", "").upper()
         birth_text = birth_text[:22] + (birth_text[22:] and '…')
         birth_list.append((day, birth_text))
@@ -81,13 +79,22 @@ holiday_list = []
 for c in gcal.walk():
     if c.name == "VEVENT":
         day = c.decoded('dtstart')
-        holiday_text = str(c.get('summary')).upper()
-        holiday_text = holiday_text[:24] + (holiday_text[24:] and '…')
+        holiday_text = str(c.get('summary')).upper().split()
+
+        # split long holidays
+        i = 0
+        text = [""]
+        for h in holiday_text:
+            if len(text[i]) + len(h) + 1 < 24:
+                text[i] += " " + h
+            else:
+                i += 1
+                text.append(h)
         if day.year == year:
-            holiday_list.append((day, holiday_text))
+            for t in text:
+                holiday_list.append((day, t))
 g.close()
 
-fnt_days = ImageFont.truetype('Merriweather_Black.ttf', 400)
 
 img = Image.new('RGB', (width, height), color=background)
 d = ImageDraw.Draw(img)
@@ -106,30 +113,42 @@ def get_day_style(colum):
     else:
         return 'black'
 
+
+fnt_days = ImageFont.truetype('fonts/Lato-Regular.ttf', 400)
+
 def draw_day(x, y, date):
     day_text = str(date.day)
     w_day, h_day = d.textsize(day_text, font=fnt_days)
-    # padding of 0.25
-    w_padding = (w_box - w_day) / 4
+
+    w_padding = (w_box - w_day) / 2
 
     d.rectangle(get_box_points(x, y), fill='white')
-    d.text(get_point(x, y, w_padding, -10), day_text, font=fnt_days, fill=get_day_style(x))
+    d.text(get_point(x, y, w_padding, -30), day_text, font=fnt_days, fill=get_day_style(x))
 
+
+fnt_notes = ImageFont.truetype('fonts/Lato-Medium.ttf', 50)
+birth_emoji = Image.open('./birth_emoji.png', 'r')
 
 def draw_notes(x, y, date):
     i = 1
 
-    for b in [b for b in holiday_list if b[0] == date]:
-        holiday_text = b[1]
-        h_padding = h_box-100*i
-        d.text(get_point(x, y, 30, h_padding), holiday_text, font=fnt_notes, fill='black')
+    today_births = [b for b in birth_list if b[0] == date]
+    for b in today_births:
+        birth_text = b[1]
+        w_name, h_name = d.textsize(birth_text, font=fnt_notes)
+        h_padding = h_box-80*i
+        d.text(get_point(x, y, (w_box-w_name)/2, h_padding), birth_text, font=fnt_notes, fill='black')
         i += 1
 
-    for b in [b for b in birth_list if b[0] == date]:
-        birth_text = b[1]
-        h_padding = h_box-100*i
-        img.paste(birth_emoji, get_point(x, y, 30, h_padding), birth_emoji)
-        d.text(get_point(x, y, 100, h_padding), birth_text, font=fnt_notes, fill='black')
+    if today_births:
+        img.paste(birth_emoji, get_point(x, y, (w_box-64)/2, h_box-80*i), birth_emoji)
+    
+    i = 1
+    for b in [b for b in holiday_list if b[0] == date]:
+        holiday_text = b[1]
+        w_text, h_text = d.textsize(holiday_text, font=fnt_notes)
+        h_padding = 350+80*i
+        d.text(get_point(x, y, (w_box-w_text)/2, h_padding), holiday_text, font=fnt_notes, fill='black')
         i += 1
 
 
@@ -144,32 +163,37 @@ for y in range(5):
 
 # Draw month and year names
 text_month = calendar.month_abbr[month].upper()
-text_year = str(year)[-2:]
+text_year = str(year)
 
 font_size = 300
-fnt_month = ImageFont.truetype('NovaMono.ttf', 400)
-fnt_year = ImageFont.truetype('Merriweather_Black.ttf', 600)
+fnt_month = ImageFont.truetype('fonts/Lato-Bold.ttf', 500)
+fnt_year = ImageFont.truetype('fonts/Lato-Thin.ttf', 400)
 
 w_month, h_month = d.textsize(text_month, font=fnt_month)
 w_year, h_year = d.textsize(text_year, font=fnt_year)
 
-# two empty space in the first column
-if sum(matrix[0]) <= sum(range(6)):
-    x, y = 0, 0
-else: # empty space in the last column
-    x, y = 5, 4
+# find empty spaces and center if there are 3 free
+sum_row = sum([not d for d in cal[4]])
+if sum_row >= 2:
+    # two empty space in the last column
+    y, x = 4, 4.5 if sum_row >= 3 else 5
+else:
+    # empty space in the first column
+    y, x = 0, 0.5 if sum([not d for d in cal[0]]) >= 3 else 0
 
-h_padding = (h_box - h_month - h_year) / 3
-w_padding = (2*w_box - max(w_month, w_year)) / 2
+h_padding = h_box/2 - h_month
+w_padding = (2*w_box - w_month) / 2
+
+w_diff = (w_year - w_month) / 2
 
 d.text(get_point(x, y, w_padding, h_padding), text_month, font=fnt_month, fill='white', anchor=1000)
-d.text(get_point(x, y, w_padding, h_padding + h_month - 100), text_year, font=fnt_year, fill='white')
+d.text(get_point(x, y, w_padding - w_diff, h_padding + h_month), text_year, font=fnt_year, fill='white')
 
 
 # Draw days names
-fnt_week = ImageFont.truetype('NovaMono.ttf', 200)
+fnt_week = ImageFont.truetype('fonts/Lato-Semibold.ttf', 200)
 for i in range(7):
-    text_week = calendar.day_abbr[(calendar.firstweekday() + i) % 7].upper()
+    text_week = calendar.day_abbr[(calendar.firstweekday() + i) % 7].capitalize()
     w_week, h_week = d.textsize(text_week, font=fnt_week)
     d.text(get_point(i, 0, (w_box - w_week) / 2, -week_off*0.75), text_week, font=fnt_week, fill='white')
 

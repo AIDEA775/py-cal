@@ -1,24 +1,17 @@
 # py-cal
 A python script to generate a calendar in SVG
 
-To add birthdays, you need a JSON file called **birthdays.json** with these parameters:
-
-```json
-[
-  {
-    "birthday": "1-31",
-    "name": "Pepe"
-  },
-]
-```
-
-Preview
+Preview:
 
 ![Calendar preview](preview.png)
 
+```
+Usage:
+  py-cal.py <year> <month> [options]
+  py-cal.py (-h | --help)
 
-### TODO
-* Add argpaser
-* Add events and holidays
-* Random background like github's commit calendar graph
-* Vectorize fonts
+Options:
+  -b RGB   Color of background [default: 424242]
+  -c FILE  Path to icalendar of birthdays [default: birthdays.ics]
+  -f FILE  Path to icalendar of holidays [default: holidays.ics]
+```
