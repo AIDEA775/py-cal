@@ -1,2 +1,5 @@
 __pycache__/
 *.json
+*.ics
+env/
+20*/

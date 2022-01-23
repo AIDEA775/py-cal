@@ -1,20 +1,22 @@
 #!/usr/bin/env bash
 
-year=2020
-ics=u100000354650822.ics
+year=2021
 
 source env/bin/activate
-python3 py-cal.py $year 1 -c $ics -b 0ead69
-python3 py-cal.py $year 2 -c $ics -b ff206e
-python3 py-cal.py $year 3 -c $ics -b 774936
-python3 py-cal.py $year 4 -c $ics -b ff8966
-python3 py-cal.py $year 5 -c $ics -b 75AADB
-python3 py-cal.py $year 6 -c $ics -b 0a3f7a
-python3 py-cal.py $year 7 -c $ics -b 757575
-python3 py-cal.py $year 8 -c $ics -b 8338ec
-python3 py-cal.py $year 9 -c $ics -b ffbe0b
-python3 py-cal.py $year 10 -c $ics -b f6511d
-python3 py-cal.py $year 11 -c $ics -b 9bc53d
-python3 py-cal.py $year 12 -c $ics -b d62828
+
+python3 py-cal.py $year 1 -b "#60d168" -a "#30bc66" &
+python3 py-cal.py $year 2 -b "#f28cdd" -a "#eb57dc" &
+python3 py-cal.py $year 3 -b "#e8aa76" -a "#dc8374" &
+python3 py-cal.py $year 4 -b "#beda5d" -a "#9dc95b" &
+python3 py-cal.py $year 5 -b "#70cbf7" -a "#37b3f7" &
+python3 py-cal.py $year 6 -b "#939aed" -a "#5d6bed" &
+python3 py-cal.py $year 7 -b "#c9c9c9" -a "#a1a1a1" &
+python3 py-cal.py $year 8 -b "#c6a4fa" -a "#a979fa" &
+python3 py-cal.py $year 9 -b "#fcdd76" -a "#facc74" &
+python3 py-cal.py $year 10 -b "#98e6db" -a "#58d8da" &
+python3 py-cal.py $year 11 -b "#5eddaa" -a "#24caa8" &
+python3 py-cal.py $year 12 -b "#e87e93" -a "#dc4491" &
+
+wait
 
 echo done.
