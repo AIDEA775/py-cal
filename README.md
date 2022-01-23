@@ -1,17 +1,18 @@
 # py-cal
-A python script to generate a calendar in SVG
+A python script to generate a calendar in PNG
+
+> **NOTE: This project was rewriten and now is [Almanko](https://github.com/AIDEA775/Almanako).**
 
 Preview:
 
 ![Calendar preview](preview.png)
 
-```
-Usage:
-  py-cal.py <year> <month> [options]
-  py-cal.py (-h | --help)
+# Run
 
-Options:
-  -b RGB   Color of background [default: 424242]
-  -c FILE  Path to icalendar of birthdays [default: birthdays.ics]
-  -f FILE  Path to icalendar of holidays [default: holidays.ics]
+Install dependencies with pip and virtual-env.
+
+Edit the script with the current year and run:
+
+```
+./run.sh
 ```
